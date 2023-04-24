@@ -13,8 +13,9 @@ Targetted microcontroller is the ESP8266, build system an Ubuntu 18.04
   local variables.
 - Also, I tend to think of headers as the interface to a module (you find in
   zigbee.h what you want to call if you are NOT in zigbee.cpp).
-- On a similar line, goinf object-or
+- On a similar line, going object-oriented C++ or module-based C or something else is yet up for grabs.
 - I am ditching vim for platformio here, but lets see how long it'll last.
+- Will need to look into general and especially embedded conventions, e.g. https://barrgroup.com/embedded-systems/books/embedded-c-coding-standard . Or GNU/Linux or GTK...
 
 ## License and Copyright
 
