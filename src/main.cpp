@@ -10,6 +10,7 @@ AsyncWebServer server(80);
 #include "board.h"
 #include "zigbee.h"
 #include "webserver.h"
+#include "serial.h"
 
 #define AP_SSID "ECU-ESP8266 (sunharvest)"
 
@@ -52,6 +53,10 @@ void setup()
   Serial.println(WiFi.softAPIP());
 
   start_webserver();
+
+  Serial.println(F("Switching serial to Zigbee module now. Last message here, goodbye"));
+  // From now on, `Serial.xyz`() goes to the CC25XX zigbee module.
+  swap_serial_to_zb();
 }
 
 /** Consume ECU.next_action out of async web server thread (which does not survive delay()s or yields). */

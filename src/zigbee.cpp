@@ -3,6 +3,7 @@
 #include "zigbee.h"
 #include "board.h"
 #include "ecu.h"
+#include "serial.h"
 
 // forward decl
 void coordinator_init();
@@ -11,7 +12,6 @@ void sendNO();
 void sendZigbee(char *command);
 void readZigbee();
 void ZBhardReset();
-inline void empty_serial();
 
 extern ecu ECU;
 
@@ -299,15 +299,6 @@ void cleanIncoming(char *buffer)
   if (buffer[0] == 'F' && buffer[1] == '8')
   {
     strcpy(buffer, &buffer[2]);
-  }
-}
-
-/** deplete the Serial buffer (read all remaining data)*/
-inline void empty_serial()
-{
-  while (Serial.available())
-  {
-    Serial.read();
   }
 }
 
