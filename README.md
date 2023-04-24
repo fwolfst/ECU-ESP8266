@@ -14,6 +14,7 @@ Targetted microcontroller is the ESP8266, build system an Ubuntu 18.04
 - Also, I tend to think of headers as the interface to a module (you find in
   zigbee.h what you want to call if you are NOT in zigbee.cpp).
 - On a similar line, goinf object-or
+- I am ditching vim for platformio here, but lets see how long it'll last.
 
 ## License and Copyright
 
