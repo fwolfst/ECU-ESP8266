@@ -343,5 +343,17 @@ void ZBhardReset()
   digitalWrite(ZB_RESET, LOW);
   delay(500);
   digitalWrite(ZB_RESET, HIGH);
+
   delay(2000); // wait for the cc2530 to reboot
+}
+
+/** Set pin modes accordingly to speak with our CC25XX */
+void setup_zigbee_board()
+{
+  pinMode(ZB_TX, OUTPUT);
+  digitalWrite(ZB_TX, LOW);
+
+  // resetpin cc2530
+  pinMode(ZB_RESET, OUTPUT);
+  digitalWrite(ZB_RESET, HIGH);
 }

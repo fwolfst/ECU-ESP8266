@@ -41,6 +41,9 @@ void setup()
   setup_led();
   blink_led(2, 200);
 
+  setup_zigbee_board();
+  //setup_zigbee_coordinator();
+
   Serial.print("Starting soft-AP ... ");
   if (!WiFi.softAP(AP_SSID)) {
     Serial.println("Failed!");

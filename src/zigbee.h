@@ -13,5 +13,6 @@
 #define ZB_TX             15 // D8
 
 bool coordinator(bool normal);
+void setup_zigbee_board();
 
 #endif
