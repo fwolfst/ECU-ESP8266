@@ -34,7 +34,10 @@ void setup()
 {
   Serial.begin(115200);
   Serial.print("ECU-ESP8266");
+
   delay(3000);
+
+  setup_led();
   blink_led(2, 200);
 
   Serial.print("Starting soft-AP ... ");

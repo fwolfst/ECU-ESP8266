@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 
+void setup_led();
 void blink_led(uint8_t count, uint8_t gap_time);
 bool waitSerialAvailable();
 

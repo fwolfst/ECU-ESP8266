@@ -6,6 +6,11 @@
 #define LED_OFF HIGH
 #define ONBOARD_LED 2 // onboard led was 2
 
+/** Enable onboard LED (output mode). */
+void setup_led(){
+  pinMode(ONBOARD_LED, OUTPUT);
+}
+
 /** blink the builtin LED count times, with gap_time between. */
 void blink_led(uint8_t count, uint8_t gap_time)
 {
