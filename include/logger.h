@@ -31,9 +31,10 @@ public:
   }
 
   void info(const char * message);
+  LogLevel level;
+
 private:
   AsyncWebSocket * websocket;
-  LogLevel level;
 };
 
 #endif
