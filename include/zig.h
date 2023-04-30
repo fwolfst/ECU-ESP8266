@@ -7,6 +7,10 @@
 
 #define CC2530_MAX_SERIAL_BUFFER_SIZE 512
 
+// PINS
+#define ZB_RESET          14 // D5
+#define ZB_TX             15 // D8
+
 enum class ZigbeeState {
   UP,
   INITIALIZING,
@@ -22,6 +26,9 @@ public:
 
   bool ping();
   int checkCoordinator(size_t maxRetries=3);
+  void initCoordinator(byte * ecuid, byte * ecuid_reverse);
+  void resetHard();
+  void setupBoard();
 
 private:
   Stream * stream;

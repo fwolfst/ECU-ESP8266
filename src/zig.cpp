@@ -190,12 +190,10 @@ void Zig::initCoordinator(byte * ecuid, byte * ecuid_reverse) {
   const byte init_cmd7[] = { 0x24, 0x00, 0x14, 0x05, 0x0F, 0x00, 0x01, 0x01, 0x00, 0x02, 0x00, 0x00, 0x15, 0x00, 0x00 };
   const byte init_cmd8[] = { 0x26, 0x00 };
 
-  /*
-    // TODO we start with a hard reset of the zb module
-    ZBhardReset();
-    delay(500);
-    TODO
-  */
+  // hard reset of the zb module
+  resetHard();
+  delay(500);
+
   unsigned char inputFrame[CC2530_MAX_SERIAL_BUFFER_SIZE] = { 0 };
   size_t read_len;
 
@@ -249,4 +247,27 @@ void Zig::initCoordinator(byte * ecuid, byte * ecuid_reverse) {
 
   read_len = stream->readBytes(inputFrame, sizeof(inputFrame));
   debugHex(logger, "cmd8 response: ", inputFrame, read_len);
+}
+
+/** Hard reset the cc25xx module*/
+void Zig::resetHard()
+{
+  logger->info("Zigbee: Hard Reset");
+
+  digitalWrite(ZB_RESET, LOW);
+  delay(500);
+  digitalWrite(ZB_RESET, HIGH);
+
+  delay(2000); // wait for the cc2530 to reboot
+}
+
+/** Set pin modes accordingly to speak with our CC25XX */
+void Zig::setupBoard()
+{
+  pinMode(ZB_TX, OUTPUT);
+  digitalWrite(ZB_TX, LOW);
+
+  // resetpin cc2530
+  pinMode(ZB_RESET, OUTPUT);
+  digitalWrite(ZB_RESET, HIGH);
 }
