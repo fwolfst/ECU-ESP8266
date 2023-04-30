@@ -8,26 +8,23 @@
 AsyncWebServer server(80);
 
 #include "board.h"
-#include "zigbee.h"
+#include "logger.h"
 #include "webserver.h"
 #include "serial.h"
+#include "zig.h"
 
 #define AP_SSID "ECU-ESP8266 (sunharvest)"
-
-/*
- * Feature Ideas:
- *   -> Real Captive Portal for easier access.
- *   -> MultiMode to feed into another network
- *   -> Button to switch on / off Wifi
- *   -> LCD Display
- */
 
 #include "ecu.h"
 
 ecu ECU = {
   .id          = "D8A3011B9780",
   .id_reverse  = "80971B01A3D8",
-  .next_action = ACTION_NOP
+  .ecuid         = { 0xD8, 0xA3, 0x01, 0x1B, 0x97, 0x80 },
+  .ecuid_reverse = { 0x80, 0x97, 0x1B, 0x01, 0xA3, 0xD8 },
+  .next_action = ACTION_NOP,
+  .logger      = Logger(&websocket, LogLevel::DEBUG),
+  .zig         = NULL
 };
 
 /** Initial setup of board, wifi, webserver, zigbee-module, ... */
@@ -39,10 +36,7 @@ void setup()
   delay(3000);
 
   setup_led();
-  blink_led(2, 200);
-
-  setup_zigbee_board();
-  //setup_zigbee_coordinator();
+  blink_led(3, 125);
 
   Serial.print("Starting soft-AP ... ");
   if (!WiFi.softAP(AP_SSID)) {
