@@ -21,14 +21,14 @@ public:
   ZigbeeState state;
 
   bool ping();
-  uint8_t send(const unsigned char * msg, size_t len);
+  int checkCoordinator(size_t maxRetries=3);
 
 private:
   Stream * stream;
   Logger * logger;
 
-  size_t sendCmd(const unsigned byte * cmd, size_t len);
-  size_t sendRaw(const unsigned byte * payload, size_t len);
+  size_t sendCmd(const byte * cmd,     size_t len);
+  size_t sendRaw(const byte * payload, size_t len);
 };
 
 #endif
