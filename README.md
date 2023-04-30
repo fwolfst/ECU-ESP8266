@@ -16,6 +16,16 @@ Targetted microcontroller is the ESP8266, build system an Ubuntu 18.04
 - On a similar line, going object-oriented C++ or module-based C or something else is yet up for grabs.
 - I am ditching vim for platformio here, but lets see how long it'll last.
 - Will need to look into general and especially embedded conventions, e.g. https://barrgroup.com/embedded-systems/books/embedded-c-coding-standard . Or GNU/Linux or GTK...
+- `SoftwareSerial` might help in developing and debugging (currently we throw away our possibility to debug to Serial, because that is remapped to the zigbee module). Or use `Serial1`?
+
+### Feature ideas
+/*
+ * Feature Ideas:
+ *   -> Real Captive Portal for easier access.
+ *   -> MultiMode to feed into another network
+ *   -> Button to switch on / off Wifi
+ *   -> LCD Display
+ */
 
 ## License and Copyright
 
