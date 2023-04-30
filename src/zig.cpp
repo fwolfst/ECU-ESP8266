@@ -76,6 +76,28 @@ return true;
 */
 }
 
+/** Send <head><size>cmd<checksum>. Returns number of bytes sent. */
+size_t Zig::sendCmd(const byte * cmd, size_t len) {
+  size_t total_len = len + 3; // +head +size +checksum
+  logger->debugf("Sending %d bytes (msg pointer size %d)", total_len, sizeof(cmd));
+
+  // Construct the message: FE<size>cmd<checksum>
+  byte out[total_len] = { 0 };
+
+  out[0] = 0xFE;             // Head
+  out[1] = len - 2;          // Size
+
+  memcpy(&out[2], cmd, len); // Payload
+  byte checkSum = checksum(cmd, len) - 1;
+  out[len + 2] = checkSum;   // Checksum
+
+  uint8_t bytes_sent = stream->write(out, total_len);
+  stream->flush();
+
+  debugPrintPayload(logger, "Sent: ", out, total_len);
+
+  return bytes_sent;
+}
 
 /** Sends the message via zigbee module. Attaching a checksum at the end. */
 uint8_t Zig::send(const unsigned char * msg, size_t len) {

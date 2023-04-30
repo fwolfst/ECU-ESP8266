@@ -26,6 +26,8 @@ public:
 private:
   Stream * stream;
   Logger * logger;
+
+  size_t sendCmd(const unsigned byte * cmd, size_t len);
 };
 
 #endif
