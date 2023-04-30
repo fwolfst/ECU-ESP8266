@@ -28,6 +28,7 @@ private:
   Logger * logger;
 
   size_t sendCmd(const unsigned byte * cmd, size_t len);
+  size_t sendRaw(const unsigned byte * payload, size_t len);
 };
 
 #endif

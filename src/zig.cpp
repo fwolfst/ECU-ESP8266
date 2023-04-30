@@ -99,8 +99,12 @@ size_t Zig::sendCmd(const byte * cmd, size_t len) {
   return bytes_sent;
 }
 
-/** Sends the message via zigbee module. Attaching a checksum at the end. */
-uint8_t Zig::send(const unsigned char * msg, size_t len) {
+/** Sends the message via zigbee module. In contrast to `sendCmd` which
+ * wraps the packet in head, length and checksum, this method sends bytes as-is.
+ * Returns the number of bytes send (ideally == len).
+*/
+size_t Zig::sendRaw(const unsigned byte * msg, size_t len)
+{
   logger->debugf("Sending %d bytes (size %d)", len, sizeof(msg));
 
   uint8_t msg_sent = stream->write(msg, len);
