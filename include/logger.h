@@ -31,6 +31,18 @@ public:
   }
 
   void info(const char * message);
+
+  /** Use sprintf like debug message. */
+  template<typename...Args>
+  void infof(const char * fmt, Args... args) {
+    // implemented here in header because of use of template.
+    if (level > LogLevel::INFO) {
+      return;
+    }
+
+    websocket->printfAll(fmt, args...);
+  }
+
   LogLevel level;
 
 private:
