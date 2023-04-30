@@ -27,7 +27,14 @@ public:
       return;
     }
 
-    websocket->printfAll(fmt, args...);
+    char msg[256] = { 0 };
+    snprintf(msg, 256, fmt, args...);
+
+    char message[256] = { 0 };
+    snprintf(message, 256, "{\"type\":\"log\",\"level\":\"debug\",\"message\":\"%s\"}", msg);
+
+    //websocket->printfAll(fmt, args...);
+    websocket->printfAll(message);
   }
 
   void info(const char * message);
@@ -40,7 +47,14 @@ public:
       return;
     }
 
-    websocket->printfAll(fmt, args...);
+    char msg[256] = { 0 };
+    snprintf(msg, 256, fmt, args...);
+
+    char message[256] = { 0 };
+    snprintf(message, 256, "{\"type\":\"log\",\"level\":\"info\",\"message\":\"%s\"}", msg);
+
+    //websocket->printfAll(fmt, args...);
+    websocket->printfAll(message);
   }
 
   LogLevel level;

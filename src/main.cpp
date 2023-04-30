@@ -77,6 +77,7 @@ void doNextAction()
     case ACTION_START_COORDINATOR:
       ECU.next_action = ACTION_NOP;
       //coordinator(false);
+      ECU.zig->initCoordinator((byte*)&ECU.ecuid, (byte*)&ECU.ecuid_reverse);
       break;
 
     default:
