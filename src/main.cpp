@@ -6,6 +6,7 @@
 #include "ESPAsyncWebServer.h"
 
 AsyncWebServer server(80);
+AsyncWebSocket websocket("/ws");
 
 #include "board.h"
 #include "logger.h"
@@ -49,18 +50,24 @@ void setup()
   Serial.print("Soft-AP IP address = ");
   Serial.println(WiFi.softAPIP());
 
-  start_webserver();
+  start_webserver(server, websocket);
 
   Serial.println(F("Switching serial to Zigbee module now. Last message here, goodbye"));
   // From now on, `Serial.xyz`() goes to the CC25XX zigbee module.
   swap_serial_to_zb();
+  ECU.zig = new Zig(&Serial, &ECU.logger);
+  ECU.zig->setupBoard();
+
+  delay(200);
+  blink_led(4, 200);
+
+  ECU.logger.info("Logger online");
 }
 
 /** Consume ECU.next_action out of async web server thread (which does not survive delay()s or yields). */
 void doNextAction()
 {
-  Serial.print("Handle action: ");
-  Serial.println(ECU.next_action);
+  ECU.logger.infof("Handle action: %d", ECU.next_action);
 
   switch (ECU.next_action)
   {
@@ -68,11 +75,12 @@ void doNextAction()
       break;
 
     case ACTION_START_COORDINATOR:
-      coordinator(true);
+      ECU.next_action = ACTION_NOP;
+      //coordinator(false);
       break;
 
     default:
-      Serial.println("Dont know how to handle this command!");
+      ECU.logger.info("Dont know how to handle this command!");
   }
 
   // We assume that we have only one action in our queue ...
@@ -82,8 +90,8 @@ void doNextAction()
 /** Your typical endless loop. */
 void loop()
 {
-  Serial.printf("Stations connected = %d\n", WiFi.softAPgetStationNum());
-  delay(3000);
+  //Serial.printf("Stations connected = %d\n", WiFi.softAPgetStationNum());
+  delay(1000);
   doNextAction();
 }
 

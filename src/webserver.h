@@ -1,6 +1,8 @@
 #ifndef _WEBSERVER_H
 #define _WEBSERVER_H
 
-void start_webserver();
+#include "ESPAsyncWebServer.h"
+
+void start_webserver(AsyncWebServer &server, AsyncWebSocket &websocket);
 
 #endif
