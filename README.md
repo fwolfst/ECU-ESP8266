@@ -27,6 +27,15 @@ Targetted microcontroller is the ESP8266, build system an Ubuntu 18.04
  *   -> LCD Display
  */
 
+### Building the pico.css
+Using `sassc` and `yui-compressor`:
+
+```bash
+cd src/css
+sassc mypico.scss | yui-compressor --type=css > mypico.css
+# or use script src/css/compile-css
+```
+
 ## License and Copyright
 
 [Unclear to me, but we are allowed to
@@ -37,3 +46,5 @@ Copyright of all zigbee related code 2021-2023
 Wolfsteller.
 
 Code by Felix Wolfsteller is released under the [AGPLv3+](https://www.gnu.org/licenses/agpl-3.0.en.html).
+
+In `src/css/picocss`, a compiled version of [pico.css](https://github.com/picocss/pico) is used, copyright Lucas Larroche, licensed under the MIT.

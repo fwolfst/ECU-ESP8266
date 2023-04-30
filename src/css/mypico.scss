@@ -1,0 +1,22 @@
+// Customized
+// Enable <header>, <main>, <footer> inside $semantic-root-element as containers
+$enable-semantic-container: true;
+
+// Enable a centered viewport for <header>, <main>, <footer> inside $enable-semantic-container 
+$enable-viewport: false;
+
+// Enable .classes
+$enable-classes: false;
+
+// Pico Lib
+// --------------------
+
+//@import "pico";
+// Import needed components
+@import "pico-1.5.9/scss/_variables.scss";
+@import "pico-1.5.9/scss/themes/default/_styles.scss";
+@import "pico-1.5.9/scss/layout/document";
+@import "pico-1.5.9/scss/layout/sectioning";
+@import "pico-1.5.9/scss/components/nav";
+@import "pico-1.5.9/scss/content/button";
+@import "pico-1.5.9/scss/content/typography";

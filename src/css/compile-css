@@ -1,0 +1,9 @@
+#!/bin/bash
+
+set -o errexit -o pipefail
+
+sassc mypico.scss | yui-compressor --type=css > mypico.css
+
+echo "now go ahead and modify src/css/mypico.css.h"
+
+exit 0
