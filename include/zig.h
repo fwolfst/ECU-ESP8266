@@ -17,6 +17,10 @@ enum class ZigbeeState {
   DOWN
 };
 
+/**
+ * Zig/bee class to setup the cc2530 module and coordinator.
+*/
+
 class Zig
 {
 public:
