@@ -41,11 +41,11 @@ bool Zig::pingCoordinator()
   logger->debug("Zig::pingCoordinator()");
 
   // Ping-command 00210120 (00: length; payload: 2101 ; 20: checksum)
-  unsigned char pingCmd[] = { 0x00, 0x21, 0x01 };
+  unsigned char pingCmd[] = { 0x21, 0x01 };
 
   emptyStream();
 
-  sendCmd(pingCmd, 3);
+  sendCmd(pingCmd, 2);
 
   unsigned char inputFrame[CC2530_MAX_SERIAL_BUFFER_SIZE];
 
@@ -55,23 +55,17 @@ bool Zig::pingCoordinator()
   //logger->debugf("read %d bytes: ", len); // answer should be answer is FE02 6101 79 07 1C
   debugHex(logger, "Read: ", inputFrame, len);
 
-  return true;
-  /*
-  // search for
-  char ping_answer[] = {0xFE 0x02 0x61 0x01};
+  // Original code searched only for
+  // char ping_answer[] = {0xFE 0x02 0x61 0x01}; 
+  const byte * answer_ok = { 0xFE, 0x02, 0x61, 0x01, 0x79, 0x07, 0x1C };
 
-  // if found
-  if (strstr(inMessage, "FE026101") == NULL)
-  {
-     logger->info("Zig: no ping answer");
-     return false;
-  }
-  else
-  {
-    logger->info("Zig: ping ok");
+  if (memcmp(inputFrame, answer_ok, sizeof(answer_ok)) == 0) {
+    logger->info("Zig: pingCoordinator(): true!");
     return true;
+  else {
+    logger->info("Zig: pingCoordinator(): false!");
+    return false;
   }
-*/
 }
 
 /** Send <head><size>cmd<checksum>. Returns number of bytes sent. */
