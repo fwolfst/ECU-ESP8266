@@ -108,6 +108,69 @@ size_t Zig::sendRaw(const byte * msg, size_t len)
   return msg_sent + crc_sent;
 }
 
+int Zig::checkCoordinator(byte * ecuid_reverse, size_t maxRetries)
+{
+  logger->debug("checkCoordinator()");
+  // Basically the 2700 command
+  // The answer can mean that the coordinator is up, not yet started or no answer
+  // we evaluate that.
+
+  // The response = 67 00, status 1 bt, IEEEAddr 8bt, ShortAddr 2bt, DeviceType 1bt, Device State 1bt
+  //   FE0E 67 00 00 FFFF 80971B01A3D8 0000 0709001
+  // status = 00 means succes, IEEEAddress= FFFF80971B01A3D8, ShortAdr = 0000, devicetype=07 bits 0 to 2
+
+  // Device State 09 started as zigbeecoordinator
+
+  // Check the radio, send FE00670067
+  //   when OK the returned string = FE0E670000FFFF + ECU_ID REVERSE + 00000709001
+  //     - so we check if we have this
+
+  
+  // strncpy(checkCommand, "00270027", 9); (raw)
+
+  const unsigned char checkCmd[] = { 0x27, 0x00 };
+
+  // first clean up the serial port
+  emptyStream();
+
+  // Try a couple of times
+  for (size_t x = 0; x < maxRetries; ++x)
+  {
+    sendCmd(checkCmd, sizeof(checkCmd));
+
+    unsigned char inputFrame[CC2530_MAX_SERIAL_BUFFER_SIZE];
+
+    // TODO Do we need manual waiting? Or does the timeout actually work?
+    stream->setTimeout(1200);
+    size_t len = stream->readBytes(inputFrame, sizeof(inputFrame));
+
+    logger->debugf("read %d bytes: ", len); // answer should be answer is FE02 6101 79 07 1C
+    debugHex(logger, "Read: ", inputFrame, len);
+
+    // We get this : FE0E670000 FFFF80971B01A3D8 0000 07090011
+    //    received : FE0E670000 FFFF80971B01A3D6 0000 0709001F when ok
+
+    // We lookg for 07 09, but after the ecu-id
+    byte * ecuid_pos = (byte *) memmem((void*)inputFrame, len, (void*) ecuid_reverse, 6);
+    if (ecuid_pos) {
+      logger->debugf(" - contains the reverse ecu id %hhX", ecuid_reverse);
+
+      size_t offset = ecuid_pos - inputFrame;
+      byte marker[] = { 0x07, 0x09 };
+
+      if (memmem(ecuid_pos + 2, len - (offset + 2), marker, 2 )) {
+        logger->debugf(" - contains marker! %hhX", marker);
+
+        //return true;
+      }
+    }
+
+    logger->info("Retrying...");
+  }
+
+  // if we come here 3 attempts failed
+  return 2;
+}
 
 
 // TODO this one is important and TODO :)

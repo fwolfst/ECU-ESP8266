@@ -31,7 +31,7 @@ public:
   void setupBoard();
   void resetHard();
 
-  int checkCoordinator(size_t maxRetries=3);
+  int checkCoordinator(byte * ecuid_reverse, size_t maxRetries=3);
   void initCoordinator(byte * ecuid, byte * ecuid_reverse);
   bool pingCoordinator();
 
