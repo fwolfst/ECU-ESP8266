@@ -57,11 +57,12 @@ bool Zig::pingCoordinator()
 
   // Original code searched only for
   // char ping_answer[] = {0xFE 0x02 0x61 0x01}; 
-  const byte * answer_ok = { 0xFE, 0x02, 0x61, 0x01, 0x79, 0x07, 0x1C };
+  const byte answer_ok[] = { 0xFE, 0x02, 0x61, 0x01, 0x79, 0x07, 0x1C };
 
   if (memcmp(inputFrame, answer_ok, sizeof(answer_ok)) == 0) {
     logger->info("Zig: pingCoordinator(): true!");
     return true;
+  }
   else {
     logger->info("Zig: pingCoordinator(): false!");
     return false;
