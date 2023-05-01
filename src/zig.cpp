@@ -34,31 +34,28 @@ static void debugHex(Logger * logger, const char * message, const unsigned char 
   logger->debugf("Checksum %02X", checksum(payload, len));
 }
 
-/** Send ping command to module and return whether the right answer came back. */
-// If the ping command fails we have to restart the coordinator
-bool Zig::ping()
+/** Send Coordinator command to module and return whether the right answer came back. */
+// If the Coordinator command fails we have to restart the coordinator
+bool Zig::pingCoordinator()
 {
-  logger->debug("Zig::ping()");
-  
+  logger->debug("Zig::pingCoordinator()");
+
   // Ping-command 00210120 (00: length; payload: 2101 ; 20: checksum)
   unsigned char pingCmd[] = { 0x00, 0x21, 0x01 };
 
-  // Emtpty the stream
-  while (stream->available()) {
-    stream->read();
-  }
+  emptyStream();
 
-  send(pingCmd, 3);
+  sendCmd(pingCmd, 3);
 
   unsigned char inputFrame[CC2530_MAX_SERIAL_BUFFER_SIZE];
 
   stream->setTimeout(1200);
   size_t len = stream->readBytes(inputFrame, sizeof(inputFrame));
 
-  logger->debugf("read %d bytes: ", len); // answer should be answer is FE02 6101 79 07 1C
+  //logger->debugf("read %d bytes: ", len); // answer should be answer is FE02 6101 79 07 1C
   debugHex(logger, "Read: ", inputFrame, len);
 
-return true;
+  return true;
   /*
   // search for
   char ping_answer[] = {0xFE 0x02 0x61 0x01};

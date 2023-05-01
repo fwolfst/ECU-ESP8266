@@ -31,26 +31,28 @@ void start_webserver(AsyncWebServer &server, AsyncWebSocket &websocket)
 {
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
             {
-    ASYNC_ACTION_START_COORDINATOR();
     request->send_P(200, "text/html", HOMEPAGE_HTML); });
 
   server.on("/js.js", HTTP_GET, [](AsyncWebServerRequest *request)
             {
-    ASYNC_ACTION_START_COORDINATOR();
     request->send_P(200, "text/html", JS_JS); }); //mimetype? TODO
 
   server.on("/mypico.css", HTTP_GET, [](AsyncWebServerRequest *request)
             {
-    ASYNC_ACTION_START_COORDINATOR();
     request->send_P(200, "text/css", MYPICO_CSS); });
 
   server.on("/test", HTTP_GET, [](AsyncWebServerRequest *request)
             {
     request->send(200, "text/html", "Hello World; test"); });
 
-  server.on("/coordinator", HTTP_GET, [](AsyncWebServerRequest *request)
+  server.on("/coordinator/start", HTTP_GET, [](AsyncWebServerRequest *request)
             {
     ASYNC_ACTION_START_COORDINATOR();
+    request->send_P(200, "text/html", HOMEPAGE_HTML); });
+
+  server.on("/coordinator/ping", HTTP_GET, [](AsyncWebServerRequest *request)
+            {
+    ASYNC_ACTION_PING_COORDINATOR();
     request->send_P(200, "text/html", HOMEPAGE_HTML); });
 
   websocket.onEvent(handle_websocket_event);

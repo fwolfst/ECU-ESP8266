@@ -80,6 +80,12 @@ void doNextAction()
       ECU.zig->initCoordinator((byte*)&ECU.ecuid, (byte*)&ECU.ecuid_reverse);
       break;
 
+    case ACTION_PING_COORDINATOR:
+      ECU.next_action = ACTION_NOP;
+      //TODO respect return value
+      ECU.zig->pingCoordinator();
+      break;
+
     default:
       ECU.logger.info("Dont know how to handle this command!");
   }
@@ -94,6 +100,7 @@ void loop()
   //Serial.printf("Stations connected = %d\n", WiFi.softAPgetStationNum());
   delay(1000);
   doNextAction();
+  websocket.cleanupClients();
+  ECU.logger.info("loop");
+  delay(1000);
 }
-
-

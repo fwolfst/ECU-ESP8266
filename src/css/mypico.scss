@@ -13,10 +13,12 @@ $enable-classes: false;
 
 //@import "pico";
 // Import needed components
-@import "pico-1.5.9/scss/_variables.scss";
+@import "pico-1.5.9/scss/variables.scss";
+@import "pico-1.5.9/scss/_functions.scss";
 @import "pico-1.5.9/scss/themes/default/_styles.scss";
+@import "pico-1.5.9/scss/themes/default/_colors.scss";
 @import "pico-1.5.9/scss/layout/document";
 @import "pico-1.5.9/scss/layout/sectioning";
-@import "pico-1.5.9/scss/components/nav";
 @import "pico-1.5.9/scss/content/button";
+@import "pico-1.5.9/scss/components/nav";
 @import "pico-1.5.9/scss/content/typography";

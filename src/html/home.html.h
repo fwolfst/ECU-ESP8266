@@ -73,7 +73,8 @@ body {
 <nav><ul>
 <li><a href="/">Home</a></li>
 <li><a href="/">Setting</a></li>
-<li><a href="/coordinator" role="button">restart coordinator</a></li></ul>
+<li><a href="/coordinator/start" role="button">restart coordinator</a></li></ul>
+<li><a href="/coordinator/ping" role="button">ping coordinator</a></li></ul>
 </nav>
 
 <div class="console" id="console">

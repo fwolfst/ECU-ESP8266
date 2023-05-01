@@ -28,11 +28,13 @@ public:
 
   ZigbeeState state;
 
-  bool ping();
+  void setupBoard();
+  void resetHard();
+
   int checkCoordinator(size_t maxRetries=3);
   void initCoordinator(byte * ecuid, byte * ecuid_reverse);
-  void resetHard();
-  void setupBoard();
+  bool pingCoordinator();
+
 
 private:
   Stream * stream;
