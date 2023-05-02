@@ -304,3 +304,187 @@ void Zig::setupBoard()
   pinMode(ZB_RESET, OUTPUT);
   digitalWrite(ZB_RESET, HIGH);
 }
+
+
+bool Zig::pairInverter() {
+  // Start with setup the coordinator
+  // Can we pair when the radio is up for normal operation
+  logger->info("Pairing inverter");
+  return true;
+
+  // TODO this seems to set normal ops to false and re-enable it at the end.
+
+  /*
+  String term = "start pairing inverter sn " + String(Inv_Prop[iKeuze].invSerial);
+  Update_Log("pairing", term);
+   if( !coordinator(false) ) {
+    term="pairing failed, zb system down";
+    Update_Log("pairing", term);
+    ws.textAll(term);
+    return false;
+  }
+
+  ws.textAll("trying pair inv " + String(iKeuze));
+  // now that we know that the radio is up, we don't need to test this in the pairing routine
+
+  if( pairing(iKeuze) ) {
+    //DebugPrintln("pairing success, saving configfile");
+    String term = "success, inverter got id " + String(Inv_Prop[iKeuze].invID);
+    Update_Log("pairing", term);
+    ws.textAll(term);  
+  } else {
+    //Serial.println("pairing failed");
+    strncpy(Inv_Prop[iKeuze].invID, "0x0000", 6);
+    String term = "failed, inverter got id " + String(Inv_Prop[iKeuze].invID);
+    Update_Log("pair", term);
+    ws.textAll(term);      
+  }
+    String bestand = "/Inv_Prop" + String(iKeuze) + ".str"; // /Inv_Prop0.str
+    writeStruct(bestand, iKeuze); // alles opslaan in SPIFFS   
+   
+   //after successfull pairing we issue the command for normal ops
+   sendNO();
+   checkCoordinator(); // updates the log
+   */
+  return true;
+}
+
+bool Zig::pairing(inverterSerialNumber_t inverterSn, ecu_id_reverse_t ecu_id_reverse, ecu_id_t ecu_id) {
+  // We call this function when coordinator is up for pairing
+  return true;
+
+/*
+  //    String pcmd[6] = {
+  //    "5",
+  //    "6700",
+  //2    pcmd_prefix + "0D0200000F1100" + String(inv_sn) + "FFFF10FFFF" + ecu_id_reverse,
+  // should be     24020FFFFFFFFFFFFFFFFF14FFFF14 0D0200000F1100 408000158215 FFFF10FFFF 80971B01A3D8
+  // constructed = 24020FFFFFFFFFFFFFFFFF14FFFF14 0D0200000F1100 408000158215 FFFF10FFFF 80971B01A3D8 OK
+
+  //3    pcmd_prefix + "0C0201000F0600" + String(inv_sn),
+  // should be     24020FFFFFFFFFFFFFFFFF14FFFF14 0C0201000F0600 408000158215
+  // constructed = 24020FFFFFFFFFFFFFFFFF14FFFF14 0C0201000F0600 408000158215 OK
+
+  //4    pcmd_prefix + "0F0102000F1100" + String(inv_sn) + ecu_id.substring(2,4) + ecu_id.substring(0,2) + "10FFFF" + ecu_id_reverse,
+  // should be 24020FFFFFFFFFFFFFFFFF14FFFF14 0F0102000F1100 408000158215 A3D8 10FFFF 80971B01A3D8
+  // construct 24020FFFFFFFFFFFFFFFFF14FFFF14 0F0102000F1100 408000158215 A3D8 10FFFF 80971B01A3D8 OK
+             
+  //5    pcmd_prefix + "010103000F0600" + ecu_id_reverse
+  // should be 24020FFFFFFFFFFFFFFFFF14FFFF14 010103000F0600 80971B01A3D8
+  // construct 24020FFFFFFFFFFFFFFFFF14FFFF14 010103000F0600 80971B01A3D8 OK
+
+  char pairBaseCommand[][254] = {
+    "5", // not a command but the total commands
+    "2700", // was 67
+    "24020FFFFFFFFFFFFFFFFF14FFFF140D0200000F1100", // + String(inv_sn) + "FFFF10FFFF" + ecu_id_reverse,
+    "24020FFFFFFFFFFFFFFFFF14FFFF140C0201000F0600", // + String(inv_sn),
+    "24020FFFFFFFFFFFFFFFFF14FFFF140F0102000F1100", // + String(inv_sn) + ecu_id.substring(2,4) + ecu_id.substring(0,2) + "10FFFF" + ecu_id_reverse,
+    "24020FFFFFFFFFFFFFFFFF14FFFF14010103000F0600", // + ecu_id_reverse
+  };
+  */
+
+  byte pair_cmd1[] = { 0x27, 0x00 };
+  byte pair_cmd2[] = { 0x24, 0x02, 0x0F, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x14, 
+                       0xFF, 0xFF, 0x14, 0x0D, 0x02, 0x00, 0x00, 0x0F, 0x11, 0x00,
+                       0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12, // placeholder for inverter id
+                       0xFF, 0xFF, 0x10, 0xFF, 0xFF,
+                       0x66, 0x66, 0x66, 0x66, 0x66, 0x66 // placeholder for ecu_id_reverse,
+                      };
+  byte pair_cmd3[] = { 0x24, 0x02, 0x0F, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x14, 
+                       0xFF, 0xFF, 0x14, 0x0C, 0x02, 0x01, 0x00, 0x0F, 0x06, 0x00,
+                       0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12, // placeholder for inverter id
+                      };
+  byte pair_cmd4[] = { 0x24, 0x02, 0x0F, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x14, 
+                       0xFF, 0xFF, 0x14, 0x0F, 0x01, 0x02, 0x00, 0x0F, 0x11, 0x00,
+                       0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12, // placeholder for inverter id
+                       0x22, 0x22, // placeholder for ecu_id.substring(2,4) + ecu_id.substring(0,2)
+                       0x10, 0xFF, 0xFF,
+                       0x66, 0x66, 0x66, 0x66, 0x66, 0x66 // placeholder for ecu_id_reverse
+                      };
+  byte pair_cmd5[] = { 0x24, 0x02, 0x0F, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                       0x14, 0xFF, 0xFF, 0x14, 0x01, 0x01, 0x03, 0x00, 0x0F, 0x06, 0x00,
+                       0x66, 0x66, 0x66, 0x66, 0x66, 0x66 // placeholder for ecu_id_reverse
+                      };
+
+  // now build the commands
+  memcpy(pair_cmd2 + 22, &inverterSn, 12);
+  memcpy(pair_cmd2 + 39, &ecu_id_reverse, 6);
+  memcpy(pair_cmd3 + 22, &inverterSn, 12);
+  memcpy(pair_cmd4 + 22, &inverterSn, 12);
+  memcpy(pair_cmd4 + 34, &ecu_id + 1, 1);
+  memcpy(pair_cmd4 + 34, &ecu_id + 0, 1);
+  memcpy(pair_cmd4 + 39, &ecu_id_reverse, 6);
+  memcpy(pair_cmd5 + 22, &ecu_id_reverse, 6);
+
+  cmd_t commands[] = {
+    { sizeof(pair_cmd1), pair_cmd1 },
+    { sizeof(pair_cmd2), pair_cmd2 },
+    { sizeof(pair_cmd3), pair_cmd3 },
+    { sizeof(pair_cmd4), pair_cmd4 },
+    { sizeof(pair_cmd5), pair_cmd5 },
+  };
+
+  /*
+//   // ***************************** command 2 ********************************************
+//   // now build command 2 this is prefix + "0D0200000F1100" + String(invSerial) + "FFFF10FFFF" + ecu_id_reverse,
+//   // add the inverter serial;
+//     strncat(pairBaseCommand[2], Inv_Prop[which].invSerial, sizeof(Inv_Prop[which].invSerial)); 
+//     delayMicroseconds(250);
+//     //now add the "FFF10FFF"
+//     strncat( pairBaseCommand[2], infix, sizeof(infix) );
+//     //now add ecu_id_reverse 
+//     strncat(pairBaseCommand[2], ecu_id_reverse, sizeof(ecu_id_reverse));
+//     // Serial.println("Cmd 2 constructed = " + String(pairBaseCommand[2]));  // ok
+
+//    // now build command 3 this is prefix + "0C0201000F0600"  + inv serial,
+//    // add the inverter serial;
+//    //Serial.println("Cmd 3 initial = " + String(pairBaseCommand[3]));
+//    strncat(pairBaseCommand[3], Inv_Prop[which].invSerial,  sizeof(Inv_Prop[which].invSerial));
+//    //Serial.println("Cmd 3 constructed = " + String(pairBaseCommand[3]));  // ok
+
+//    // now build command 4 this is prefix + "0F0102000F1100"  + invSerial + short ecu_id_reverse, + 10FFF + ecu_id_reverse
+//    // add the inverter serial;
+//    //Serial.println("Cmd 4 initial = " + String(pairBaseCommand[4]));
+//    strncat(pairBaseCommand[4], Inv_Prop[which].invSerial,  sizeof(Inv_Prop[which].invSerial));
+//    strncat(pairBaseCommand[4], ECU_ID + 2, 2); // D8A3011B9780 must be A3D8
+//    strncat(pairBaseCommand[4], ECU_ID, 2);
+//    strncat(pairBaseCommand[4], outfix, sizeof(outfix) );
+//    strncat(pairBaseCommand[4], ecu_id_reverse, sizeof(ecu_id_reverse));
+
+    // now build command 5 this is prefix  + "010103000F0600" + ecu_id_reverse,
+    // strncat(pairBaseCommand[5], ecu_id_reverse, sizeof(ecu_id_reverse));
+
+    // now send these  5 commands
+    // the first command is the healtcheck so we could do checkZigbeeRadio and if this failes break
+    // the radiocheck is done already so we can skip cmd 1
+  */
+
+  bool success = false;
+  byte inputFrame[CC2530_MAX_SERIAL_BUFFER_SIZE] = { 0 };
+  size_t read_len = 0;
+
+  for (int cmd_idx = 1; cmd_idx < sizeof(commands) / sizeof(cmd_t); cmd_idx++) 
+  {
+    //cmd 0 to 9 all ok
+
+    // send and read
+    logger->infof("Sending pairInverter cmd %d", cmd_idx);
+    sendCmd(commands[cmd_idx].cmd, commands[cmd_idx].length);
+
+    //delay(1500); // give the inverter the chance to answer
+
+    read_len = stream->readBytes(inputFrame, sizeof(inputFrame));
+    debugHex(logger, "response: ", inputFrame, read_len);
+
+        // after sending cmd 3 or 4 we can expect an answer to decode
+    if(cmd_idx == 2 || cmd_idx == 3) {
+      /*if ( decodePairMessage(which) ) 
+          {
+             success = true;
+          } 
+      }*/
+    }
+  }
+
+  return success;
+}

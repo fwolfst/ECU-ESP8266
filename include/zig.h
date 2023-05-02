@@ -4,6 +4,7 @@
 #include <Arduino.h>
 
 #include "logger.h"
+#include "ecu.h"
 
 #define CC2530_MAX_SERIAL_BUFFER_SIZE 512
 
@@ -34,7 +35,10 @@ public:
   int checkCoordinator(byte * ecuid_reverse, size_t maxRetries=3);
   void initCoordinator(byte * ecuid, byte * ecuid_reverse);
   bool pingCoordinator();
-
+  /* TODO is typedef passed by ref? */
+  bool pairing(inverterSerialNumber_t inverterSn, ecu_id_reverse_t ecu_id_reverse, ecu_id_t ecu_id);
+  bool pairInverter();
+  
 
 private:
   Stream * stream;

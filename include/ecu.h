@@ -5,14 +5,18 @@
 #include "logger.h"
 #include "zig.h"
 
-typedef struct ecu_id { byte x[6]; } ecu_id;
+class Zig; // forward decl
+
+typedef struct ecu_id { byte x[6]; } ecu_id_t;
+typedef struct ecu_id_reverse { byte x[6]; } ecu_id_reverse_t;
+typedef struct inverterSerialNumber { byte x[12]; } inverterSerialNumber_t;
 
 /** Configuration, state and properties of an ECU. */
 typedef struct ecu {
   char id[13];
   char id_reverse[13];
-  ecu_id ecuid;
-  ecu_id ecuid_reverse;
+  ecu_id_t ecuid;
+  ecu_id_reverse_t ecuid_reverse;
   uint8_t next_action; // Set e.g. by the async webserver
   Logger logger;
   Zig * zig;
