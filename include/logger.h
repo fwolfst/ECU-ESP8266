@@ -9,6 +9,9 @@ enum class LogLevel {
   WARN
 };
 
+static const char logMsgJsonFmtDebug[] = "{\"type\":\"log\",\"level\":\"debug\",\"message\":\"%s\"}";
+static const char logMsgJsonFmtInfo[]  = "{\"type\":\"log\",\"level\":\"info\",\"message\":\"%s\"}";
+
 /**
  * A (websocket) logger.
  * Implemented to remove dependency to web stuff from users.
@@ -27,11 +30,11 @@ public:
       return;
     }
 
-    char msg[256] = { 0 };
-    snprintf(msg, 256, fmt, args...);
+    char msg[256 - sizeof(logMsgJsonFmtDebug)] = { 0 };
+    snprintf(msg, 256 - sizeof(logMsgJsonFmtDebug), fmt, args...);
 
     char message[256] = { 0 };
-    snprintf(message, 256, "{\"type\":\"log\",\"level\":\"debug\",\"message\":\"%s\"}", msg);
+    snprintf(message, 256, logMsgJsonFmtDebug, msg);
 
     //websocket->printfAll(fmt, args...);
     websocket->printfAll(message);
@@ -39,7 +42,7 @@ public:
 
   void info(const char * message);
 
-  /** Use sprintf like debug message. */
+  /** Use sprintf like info message. */
   template<typename...Args>
   void infof(const char * fmt, Args... args) {
     // implemented here in header because of use of template.
@@ -47,11 +50,11 @@ public:
       return;
     }
 
-    char msg[256] = { 0 };
-    snprintf(msg, 256, fmt, args...);
+    char msg[256 - sizeof(logMsgJsonFmtInfo)] = { 0 };
+    snprintf(msg, 256 - sizeof(logMsgJsonFmtInfo), fmt, args...);
 
     char message[256] = { 0 };
-    snprintf(message, 256, "{\"type\":\"log\",\"level\":\"info\",\"message\":\"%s\"}", msg);
+    snprintf(message, 256, logMsgJsonFmtInfo, msg);
 
     //websocket->printfAll(fmt, args...);
     websocket->printfAll(message);

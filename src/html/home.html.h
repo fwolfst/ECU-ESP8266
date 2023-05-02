@@ -41,6 +41,7 @@ body {
     console.log("Websocket: close");
   }
   
+  /* Handle websocket message (log) events. */
   webSocket.onmessage = function(e) {
     console.log("Websocket: message");
     console.log(e.data);
@@ -66,19 +67,40 @@ body {
       document.getElementById('console').prepend(logEntry);
     }
   }
+
+  /* Disable link following for pure action trigger links. */
+  window.onload = function() {
+    var links = document.querySelectorAll("a[data-action]");
+    var triggerDontFollow = function(event) {
+      console.log("preventing link visit");
+      // / post to the action endpoint
+      fetch(event.target.href);
+      event.preventDefault();
+    };
+    for (var i = 0; i < links.length; i++) {
+      links[i].onclick = triggerDontFollow;
+    }
+  }
 </script>
 </head>
 
 <body class="container">
-<nav><ul>
+<header>
+<nav>
+<ul><li><strong>ECU-ESP8266</strong></li></ul>
+<ul>
 <li><a href="/">Home</a></li>
 <li><a href="/">Setting</a></li>
-<li><a href="/coordinator/start" role="button">restart coordinator</a></li></ul>
+<li><a data-action="true" href="/coordinator/start" role="button">restart coordinator</a></li>
+<li><a href="/coordinator/start" role="button">restart coordinator</a></li>
 <li><a href="/coordinator/ping" role="button">ping coordinator</a></li></ul>
 </nav>
+</header>
 
+<main>
 <div class="console" id="console">
 </div>
+</main>
 </body>
 <footer></footer>
 </html>
