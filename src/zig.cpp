@@ -1,4 +1,10 @@
 #include "zig.h"
+#include <string.h> // for memmem
+
+typedef struct cmd {
+  size_t length;
+  const byte * cmd;
+} cmd_t;
 
 /** Create a Zig instance. `serial` should be the Serial that is written to
  * (CC2530 module). */
@@ -245,6 +251,18 @@ void Zig::initCoordinator(byte * ecuid, byte * ecuid_reverse) {
   const byte init_cmd7[] = { 0x24, 0x00, 0x14, 0x05, 0x0F, 0x00, 0x01, 0x01, 0x00, 0x02, 0x00, 0x00, 0x15, 0x00, 0x00 };
   const byte init_cmd8[] = { 0x26, 0x00 };
 
+  // ** (size, pointer_to_cmd?)
+  cmd_t commands[] = {
+    { sizeof(init_cmd1), init_cmd1 },
+    { sizeof(init_cmd2), init_cmd2 },
+    { sizeof(init_cmd3), init_cmd3 },
+    { sizeof(init_cmd4), init_cmd4 },
+    { sizeof(init_cmd5), init_cmd5 },
+    { sizeof(init_cmd6), init_cmd6 },
+    { sizeof(init_cmd7), init_cmd7 },
+    { sizeof(init_cmd8), init_cmd8 },
+  };
+
   // hard reset of the zb module
   resetHard();
   delay(500);
@@ -252,56 +270,16 @@ void Zig::initCoordinator(byte * ecuid, byte * ecuid_reverse) {
   unsigned char inputFrame[CC2530_MAX_SERIAL_BUFFER_SIZE] = { 0 };
   size_t read_len;
 
-  logger->debug("**Init cmd 1**");
-  sendCmd(init_cmd1, sizeof(init_cmd1));
-
-  // TODO Do we need manual waiting? Or does the timeout actually work? stream->setTimeout(1300);
-  read_len = stream->readBytes(inputFrame, sizeof(inputFrame));
-  debugHex(logger, "cmd1 response: ", inputFrame, read_len);
-
-  logger->debug("**Init cmd 2**");
-  sendCmd(init_cmd2, sizeof(init_cmd2));
-
-  read_len = stream->readBytes(inputFrame, sizeof(inputFrame));
-  debugHex(logger, "cmd2 response: ", inputFrame, read_len);
-
-  logger->debug("**Init cmd 3**");
   memcpy((void*) init_cmd3 + 6, ecuid_reverse, 6);
-  sendCmd(init_cmd3, sizeof(init_cmd3));
-
-  read_len = stream->readBytes(inputFrame, sizeof(inputFrame));
-  debugHex(logger, "cmd3 response: ", inputFrame, read_len);
-
-  logger->debug("**Init cmd 4**");
-  sendCmd(init_cmd4, sizeof(init_cmd4));
-
-  read_len = stream->readBytes(inputFrame, sizeof(inputFrame));
-  debugHex(logger, "cmd4 response: ", inputFrame, read_len);
-
-  logger->debug("**Init cmd 5**");
   memcpy((void*) init_cmd5 + 4, ecuid, 2);
-  sendCmd(init_cmd5, sizeof(init_cmd5));
 
-  read_len = stream->readBytes(inputFrame, sizeof(inputFrame));
-  debugHex(logger, "cmd5 response: ", inputFrame, read_len);
+  for (size_t cmd_idx = 0; cmd_idx < sizeof(commands) / sizeof(cmd_t); cmd_idx++) {
+    logger->infof("Sending initCoordinator cmd %d", cmd_idx);
+    sendCmd(commands[cmd_idx].cmd, commands[cmd_idx].length);
 
-  logger->debug("**Init cmd 6**");
-  sendCmd(init_cmd6, sizeof(init_cmd6));
-
-  read_len = stream->readBytes(inputFrame, sizeof(inputFrame));
-  debugHex(logger, "cmd6 response: ", inputFrame, read_len);
-
-  logger->debug("**Init cmd 7**");
-  sendCmd(init_cmd7, sizeof(init_cmd7));
-
-  read_len = stream->readBytes(inputFrame, sizeof(inputFrame));
-  debugHex(logger, "cmd7 response: ", inputFrame, read_len);
-
-  logger->debug("**Init cmd 8**");
-  sendCmd(init_cmd8, sizeof(init_cmd8));
-
-  read_len = stream->readBytes(inputFrame, sizeof(inputFrame));
-  debugHex(logger, "cmd8 response: ", inputFrame, read_len);
+    read_len = stream->readBytes(inputFrame, sizeof(inputFrame));
+    debugHex(logger, "response: ", inputFrame, read_len);
+  }
 }
 
 /** Hard reset the cc25xx module*/
