@@ -20,18 +20,21 @@ typedef struct ecu {
   uint8_t next_action; // Set e.g. by the async webserver
   Logger logger;
   Zig * zig;
-} ecu;
+} ecu_t;
 
-extern ecu ECU;
+extern ecu_t ECU;
 
-#define ACTION_NOP                0
-#define ACTION_START_COORDINATOR 20
-#define ACTION_PING_COORDINATOR  22
-#define ACTION_CHECK_COORDINATOR 25
+// TODO these would be fine in an enum, too.
+#define ACTION_NOP                      0
+#define ACTION_START_COORDINATOR       20
+#define ACTION_PING_COORDINATOR        22
+#define ACTION_CHECK_COORDINATOR       25
+#define ACTION_HEALTHCHECK_COORDINATOR 27
 
 #define ASYNC_ACTION_NOP() ECU.next_action = ACTION_NOP;
 #define ASYNC_ACTION_START_COORDINATOR() ECU.next_action = ACTION_START_COORDINATOR
 #define ASYNC_ACTION_PING_COORDINATOR()  ECU.next_action = ACTION_PING_COORDINATOR
 #define ASYNC_ACTION_CHECK_COORDINATOR()  ECU.next_action = ACTION_CHECK_COORDINATOR
+#define ASYNC_ACTION_HEALTHCHECK_COORDINATOR()  ECU.next_action = ACTION_HEALTHCHECK_COORDINATOR
 
 #endif
