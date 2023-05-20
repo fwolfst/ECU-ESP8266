@@ -8,7 +8,7 @@ typedef struct cmd {
 
 /** Create a Zig instance. `serial` should be the Serial that is written to
  * (CC2530 module). */
-Zig::Zig(Stream * serial, Logger * logLogger)
+Zig::Zig(Stream *serial, Logger *logLogger)
 {
   stream = serial;
   logger = logLogger;
@@ -16,28 +16,56 @@ Zig::Zig(Stream * serial, Logger * logLogger)
 }
 
 /** Return byte for some kind of checksum (maybe CRC, all bytes XORed). */
-inline uint8_t checksum(const unsigned char * msg, size_t len) {
+inline uint8_t checksum(const unsigned char *msg, size_t len)
+{
   uint8_t buff = msg[0];
   for (size_t i = 1; i < len; i++)
   {
     buff ^= msg[i];
   }
+
   return buff;
 }
 
+/** Consume everything in the Stream (fast forward). */
+void Zig::emptyStream() {
+  while (stream->available())
+  {
+    stream->read();
+  }
+}
+
 /** Debug a message as hex, if the logger has debug level. */
-static void debugHex(Logger * logger, const char * message, const unsigned char * payload, size_t len) {
-  if (logger->level > LogLevel::DEBUG) {
+static void debugHex(Logger *logger, const char *message, const unsigned char *payload, size_t len)
+{
+  if (logger->level > LogLevel::DEBUG)
+  {
     return;
   }
 
   char debugMsg[len * 2 + 1] = {0};
-  for(size_t i = 0; i < len; ++i) {
+  for (size_t i = 0; i < len; ++i)
+  {
     sprintf(debugMsg + (i * 2), "%02X", payload[i]);
   }
 
-  logger->debugf("%s: %s", message, debugMsg);
-  logger->debugf("Checksum %02X", checksum(payload, len));
+  logger->debugf("%s [%d bytes] %s", message, len, debugMsg);
+}
+
+static void debugPrintPayload(Logger * logger, const char * message, const byte * payload, size_t len) {
+if (logger->level > LogLevel::DEBUG)
+  {
+    return;
+  }
+
+  char debugMsg[len * 2 + 1] = { 0 };
+  for (size_t i = 0; i < len; ++i)
+  {
+    // TODO padding would be nice (FE02 AB02 ...)
+    sprintf(debugMsg + (i * 2), "%02X", payload[i]);
+  }
+
+  logger->debugf("%s [%d bytes] %s", message, len, debugMsg);
 }
 
 /** Send Coordinator command to module and return whether the right answer came back. */
@@ -61,8 +89,7 @@ bool Zig::pingCoordinator()
   //logger->debugf("read %d bytes: ", len); // answer should be answer is FE02 6101 79 07 1C
   debugHex(logger, "Read: ", inputFrame, len);
 
-  // Original code searched only for
-  // char ping_answer[] = {0xFE 0x02 0x61 0x01}; 
+  // Original code searched only for char ping_short_answer[] = {0xFE 0x02 0x61 0x01};
   const byte answer_ok[] = { 0xFE, 0x02, 0x61, 0x01, 0x79, 0x07, 0x1C };
 
   if (memcmp(inputFrame, answer_ok, sizeof(answer_ok)) == 0) {
@@ -114,7 +141,12 @@ size_t Zig::sendRaw(const byte * msg, size_t len)
   return msg_sent + crc_sent;
 }
 
-int Zig::checkCoordinator(byte * ecuid_reverse, size_t maxRetries)
+/**
+ * Checks the coordinator by looking at its response to a specific command (2700).
+ * Returns 0 in case of no errors, an error code otherwise.
+ * @TODO API
+*/
+int Zig::checkCoordinator(const byte * ecuid_reverse, size_t maxRetries)
 {
   logger->debug("checkCoordinator()");
   // Basically the 2700 command
@@ -131,9 +163,7 @@ int Zig::checkCoordinator(byte * ecuid_reverse, size_t maxRetries)
   //   when OK the returned string = FE0E670000FFFF + ECU_ID REVERSE + 00000709001
   //     - so we check if we have this
 
-  
   // strncpy(checkCommand, "00270027", 9); (raw)
-
   const unsigned char checkCmd[] = { 0x27, 0x00 };
 
   // first clean up the serial port
@@ -150,13 +180,13 @@ int Zig::checkCoordinator(byte * ecuid_reverse, size_t maxRetries)
     stream->setTimeout(1200);
     size_t len = stream->readBytes(inputFrame, sizeof(inputFrame));
 
-    logger->debugf("read %d bytes: ", len); // answer should be answer is FE02 6101 79 07 1C
+    // answer should be FE02 6101 79 07 1C
     debugHex(logger, "Read: ", inputFrame, len);
 
     // We get this : FE0E670000 FFFF80971B01A3D8 0000 07090011
     //    received : FE0E670000 FFFF80971B01A3D6 0000 0709001F when ok
 
-    // We lookg for 07 09, but after the ecu-id
+    // We look for 07 09, but after the ecu-id
     byte * ecuid_pos = (byte *) memmem((void*)inputFrame, len, (void*) ecuid_reverse, 6);
     if (ecuid_pos) {
       logger->debugf(" - contains the reverse ecu id %hhX", ecuid_reverse);
@@ -167,11 +197,14 @@ int Zig::checkCoordinator(byte * ecuid_reverse, size_t maxRetries)
       if (memmem(ecuid_pos + 2, len - (offset + 2), marker, 2 )) {
         logger->debugf(" - contains marker! %hhX", marker);
 
-        //return true;
+        return 0;
+      }
+      else {
+        logger->debugf(" - but does not contain marker");
       }
     }
 
-    logger->info("Retrying...");
+    logger->infof("Retrying... %d/%d", x, maxRetries);
   }
 
   // if we come here 3 attempts failed
@@ -179,8 +212,8 @@ int Zig::checkCoordinator(byte * ecuid_reverse, size_t maxRetries)
 }
 
 
-// TODO this one is important and TODO :)
-void Zig::initCoordinator(byte * ecuid, byte * ecuid_reverse) {
+/** Send initialization commands to the zigbee hardware. */
+void Zig::initCoordinator(const byte * ecuid, const byte * ecuid_reverse) {
   /* Initializing the coordinator takes the following procedure:
   *
   * 1st we send a resetcommand 4 times Sent=FE0141000040
@@ -266,6 +299,7 @@ void Zig::initCoordinator(byte * ecuid, byte * ecuid_reverse) {
   // hard reset of the zb module
   resetHard();
   delay(500);
+  emptyStream();
 
   unsigned char inputFrame[CC2530_MAX_SERIAL_BUFFER_SIZE] = { 0 };
   size_t read_len;
@@ -428,11 +462,11 @@ bool Zig::pairing(inverterSerialNumber_t inverterSn, ecu_id_reverse_t ecu_id_rev
 //   // ***************************** command 2 ********************************************
 //   // now build command 2 this is prefix + "0D0200000F1100" + String(invSerial) + "FFFF10FFFF" + ecu_id_reverse,
 //   // add the inverter serial;
-//     strncat(pairBaseCommand[2], Inv_Prop[which].invSerial, sizeof(Inv_Prop[which].invSerial)); 
+//     strncat(pairBaseCommand[2], Inv_Prop[which].invSerial, sizeof(Inv_Prop[which].invSerial));
 //     delayMicroseconds(250);
 //     //now add the "FFF10FFF"
 //     strncat( pairBaseCommand[2], infix, sizeof(infix) );
-//     //now add ecu_id_reverse 
+//     //now add ecu_id_reverse
 //     strncat(pairBaseCommand[2], ecu_id_reverse, sizeof(ecu_id_reverse));
 //     // Serial.println("Cmd 2 constructed = " + String(pairBaseCommand[2]));  // ok
 
@@ -455,7 +489,7 @@ bool Zig::pairing(inverterSerialNumber_t inverterSn, ecu_id_reverse_t ecu_id_rev
     // strncat(pairBaseCommand[5], ecu_id_reverse, sizeof(ecu_id_reverse));
 
     // now send these  5 commands
-    // the first command is the healtcheck so we could do checkZigbeeRadio and if this failes break
+    // the first command is the healthcheck so we could do checkZigbeeRadio and if this failes break
     // the radiocheck is done already so we can skip cmd 1
   */
 
@@ -463,7 +497,7 @@ bool Zig::pairing(inverterSerialNumber_t inverterSn, ecu_id_reverse_t ecu_id_rev
   byte inputFrame[CC2530_MAX_SERIAL_BUFFER_SIZE] = { 0 };
   size_t read_len = 0;
 
-  for (int cmd_idx = 1; cmd_idx < sizeof(commands) / sizeof(cmd_t); cmd_idx++) 
+  for (int cmd_idx = 1; cmd_idx < sizeof(commands) / sizeof(cmd_t); cmd_idx++)
   {
     //cmd 0 to 9 all ok
 

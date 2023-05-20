@@ -18,10 +18,15 @@ enum class ZigbeeState {
   DOWN
 };
 
+// Class has following responsabilities:
+// - communication with serial/zb like sending and reading
+// - setup routines for the modules and healthchecks
+// - communication with inverter, like pairing and polling
+//   -> these are slightly too many
+
 /**
  * Zig/bee class to setup the cc2530 module and coordinator.
 */
-
 class Zig
 {
 public:
@@ -32,8 +37,10 @@ public:
   void setupBoard();
   void resetHard();
 
-  int checkCoordinator(byte * ecuid_reverse, size_t maxRetries=3);
-  void initCoordinator(byte * ecuid, byte * ecuid_reverse);
+  /** TODO: use types for ids */
+  int checkCoordinator(const byte * ecuid_reverse, size_t maxRetries=3);
+  void sendNormalOp();
+  void initCoordinator(const byte * ecuid, const byte * ecuid_reverse);
   bool pingCoordinator();
   /* TODO is typedef passed by ref? */
   bool pairing(inverterSerialNumber_t inverterSn, ecu_id_reverse_t ecu_id_reverse, ecu_id_t ecu_id);
